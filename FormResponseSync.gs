@@ -29,21 +29,40 @@ function updateUnprocessedData() {
     
     // 處理每一列未處理的資料
     let processCount = 0;
+    let errorCount = 0;
     console.log('開始處理未同步的資料...');
     
     for (let i = 1; i < sourceData.length; i++) {
       // 如果狀態欄是空的，才處理
       if (!sourceData[i][statusIndex]) {
         console.log(`處理第 ${i + 1} 列：教師 ${sourceData[i][nameIndex]}`);
-        processRow(sourceSheet, targetSheet, sourceData[i], i + 1, 
-                  nameIndex, urlIndex, courseIndex, statusIndex);
-        processCount++;
+        const success = processRow(sourceSheet, targetSheet, sourceData[i], i + 1, 
+                                 nameIndex, urlIndex, courseIndex, statusIndex);
+        if (success) {
+          processCount++;
+        } else {
+          errorCount++;
+        }
       }
     }
     
-    console.log(`處理完成，共處理 ${processCount} 筆資料`);
+    // 顯示執行結果
+    const ui = SpreadsheetApp.getUi();
+    if (processCount + errorCount === 0) {
+      ui.alert('執行完成', '沒有需要處理的資料', ui.ButtonSet.OK);
+    } else {
+      ui.alert('執行完成', 
+              `共處理 ${processCount + errorCount} 筆資料\n` +
+              `成功: ${processCount} 筆\n` +
+              `失敗: ${errorCount} 筆\n\n` +
+              `請查看狀態欄位了解詳細結果`,
+              ui.ButtonSet.OK);
+    }
+    
+    console.log(`處理完成，成功: ${processCount} 筆，失敗: ${errorCount} 筆`);
   } catch (error) {
     console.error('執行過程發生錯誤：', error);
+    // 系統錯誤才顯示彈窗
     SpreadsheetApp.getUi().alert('執行過程發生錯誤：' + error.message);
   }
 }
@@ -73,7 +92,7 @@ function processRow(sourceSheet, targetSheet, rowData, rowNum,
   if (errors.length > 0) {
     console.log(`- 處理失敗：${errors.join(', ')}`);
     markAsError(sourceSheet, rowNum, errors, timestamp);
-    return;
+    return false;
   }
   
   // 在目標表格中尋找或新增教師
@@ -82,9 +101,11 @@ function processRow(sourceSheet, targetSheet, rowData, rowNum,
                      rowData[urlIndex], rowData[courseIndex]);
     console.log(`- 處理成功`);
     markAsSuccess(sourceSheet, rowNum, timestamp);
+    return true;
   } catch (error) {
     console.log(`- 處理失敗：${error.message}`);
     markAsError(sourceSheet, rowNum, [error.message], timestamp);
+    return false;
   }
 }
 
