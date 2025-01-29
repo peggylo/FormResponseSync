@@ -1,6 +1,6 @@
 // 設定兩個試算表的 ID
-const SOURCE_SPREADSHEET_ID = '11N3O17AWSOi61ASVbNUzk5bP_3jqwZvYNEFqreMKT_0';
-const TARGET_SPREADSHEET_ID = '1Es9UH7JFOipQ0o-tyjFdTGg98ZHKC9y94cZnWoDVRG0';
+const SOURCE_SPREADSHEET_ID = 'spreadsheet_ID1';
+const TARGET_SPREADSHEET_ID = 'spreadsheet_ID2';
 
 // 常數定義
 const STATUS_COLUMN_NAME = '處理狀態';
